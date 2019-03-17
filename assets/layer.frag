@@ -38,8 +38,7 @@ const int[] LOOKUP_TABLE = {
 
 const float IDX_SIZE = 1 / 6.0;
 
-bool sample_at(float x, float y) {
-	vec3 round_pos = floor(Pos / ADVANCE) * ADVANCE;
+bool sample_at(vec3 round_pos, float x, float y) {
 	return texture(NoiseMap, (round_pos + vec3(x, y, 0)) / (textureSize(NoiseMap, 0) * vec3(1, 1, -LAYER_DISTANCE))).r > THRESH;
 }
 
@@ -50,18 +49,20 @@ vec3 hsv2rgb(float h) {
 	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-vec3 sample_color(float x, float y) {
-	vec3 round_pos = floor(Pos / ADVANCE) * ADVANCE;
+vec3 sample_color(vec3 round_pos, float x, float y) {
 	return hsv2rgb(texture(ColorMap, (round_pos + vec3(x, y, 0)) / (textureSize(ColorMap, 0) * vec3(1, 1, -LAYER_DISTANCE))).r);
 }
 
 void main() {
+	// Precompute this
+	vec3 rrp = floor(Pos / ADVANCE) * ADVANCE;
+	rrp = vec3(rrp.xy, Pos.z);
 	
 	// First step: sample all four corners
-	bool tl = sample_at(0, 0);
-	bool tr = sample_at(ADVANCE_X, 0);
-	bool bl = sample_at(0, ADVANCE_Y);
-	bool br = sample_at(ADVANCE_X, ADVANCE_Y);
+	bool tl = sample_at(rrp, 0, 0);
+	bool tr = sample_at(rrp, ADVANCE_X, 0);
+	bool bl = sample_at(rrp, 0, ADVANCE_Y);
+	bool br = sample_at(rrp, ADVANCE_X, ADVANCE_Y);
 	// (a b c d)
 	int index = 1 * int(br) + 2 * int(bl) + 4 * int(tr) + 8 * int(tl);
 
@@ -83,5 +84,5 @@ void main() {
 
 	vec4 preColor = texture(Font, round_pos.xy);
 	if (preColor.r < 0.4) discard;
-	Color = preColor * vec4(sample_color(ADVANCE_X / 2, ADVANCE_Y / 2), 1);
+	Color = preColor * vec4(sample_color(rrp, ADVANCE_X / 2, ADVANCE_Y / 2), 1);
 }

@@ -10,12 +10,14 @@ GLuint noisegen::generateNoiseTexture(int width, int height, int layers, int see
 	// Generate noise
 	FastNoiseSIMD * noise = FastNoiseSIMD::NewFastNoiseSIMD(seed);
 
-	noise->SetFrequency(0.016);
+	noise->SetFrequency(0.010);
 	noise->SetFractalOctaves(3);
 	noise->SetPerturbType(FastNoiseSIMD::PerturbType::GradientFractal);
 	noise->SetPerturbAmp(0.2);
+	noise->SetPerturbFractalOctaves(4);
 	
 	std::cout << "Generating noise, please wait... ";
+	std::cout.flush();
 	float * noise_data = noise->GetSimplexFractalSet(0, 0, 0, layers, height, width);
 	std::cout << "Done" << std::endl;
 
@@ -28,9 +30,9 @@ GLuint noisegen::generateNoiseTexture(int width, int height, int layers, int see
 	// Set texture params
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	// Done
 	return texture;
