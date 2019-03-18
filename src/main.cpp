@@ -9,10 +9,10 @@
 #include "renderman.h"
 
 const inline float ZOOM = 20;
-const inline float SPEED = 0.3;
-const inline int LAYERS = 8;
-const inline int SEED = 13;
-const inline int SIZE = 512;
+const inline float SPEED = 0.34;
+const inline int LAYERS = 128;
+const inline int SEED = 19;
+const inline int SIZE = 768;
 constexpr inline float SENS = 0.008;
 
 int main(int argc, char ** argv) {
@@ -55,7 +55,7 @@ int main(int argc, char ** argv) {
 	glm::mat4 view       = glm::lookAt(glm::vec3(100, 100, 0), glm::vec3(100, 100, -10), glm::vec3(0, 1, 0));
 
 	glm::vec3 position(100, 100, ZOOM);
-	glm::vec3 velocity(0, 0, 0);
+	glm::vec4 velocity(0);
 
 	// Load font atlas
 	sf::Texture fnt;
@@ -67,6 +67,7 @@ int main(int argc, char ** argv) {
 	sf::Vector2i center(512, 384);
 	float yaw = 0;
 	float pitch = 0;
+	float roll = 0;
 
 	while (true) {
 		// Handle events
@@ -78,12 +79,12 @@ int main(int argc, char ** argv) {
 						goto die;
 					case sf::Event::Resized:
 						glViewport(0, 0, event.size.width, event.size.height);
-						projection = glm::perspective(glm::radians(100.0), (double)event.size.width / event.size.height, 0.2, 150.0);
+						projection = glm::perspective(glm::radians(100.0), (double)event.size.width / event.size.height, 0.2, 300.0);
 						center = sf::Vector2i(event.size.width / 2, event.size.height / 2);
 						break;
 					case sf::Event::KeyPressed:
 						if (event.key.code == sf::Keyboard::Escape) goto die;
-						if (event.key.code == sf::Keyboard::F) {pitch = 1.57; yaw = -1.57;}
+						if (event.key.code == sf::Keyboard::F) {pitch = 1.57; yaw = -1.57; roll = 0;}
 						break;
 					case sf::Event::MouseMoved:
 						if (event.mouseMove.x == center.x && event.mouseMove.y == center.y) break;
@@ -130,6 +131,15 @@ int main(int argc, char ** argv) {
 		else {
 			velocity.z = 0;
 		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+			velocity.w = -SPEED / 4;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+			velocity.w = SPEED / 4;
+		}
+		else {
+			velocity.w = 0;
+		}
 
 		// Do rendering
 		glm::vec3 offset_vec = glm::vec3(
@@ -141,8 +151,9 @@ int main(int argc, char ** argv) {
 		glm::vec3 forward = glm::vec3(-glm::cos(yaw), 0, glm::sin(yaw));
 		glm::vec3 left = glm::cross(forward, glm::vec3(0, 1, 0));
 		position += forward * velocity.y + left * velocity.x + glm::vec3(0, 1, 0) * velocity.z;
+		roll -= (velocity.w / 4);
 
-		view = glm::lookAt(position, position - offset_vec, glm::vec3(0, 1, 0));
+		view = glm::lookAt(position, position - offset_vec, glm::vec3(glm::sin(roll), glm::cos(roll), 0));
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

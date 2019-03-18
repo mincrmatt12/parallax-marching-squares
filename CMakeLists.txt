@@ -7,7 +7,11 @@ find_package(OpenGL REQUIRED)
 find_package(gl3w REQUIRED)
 find_package(glm REQUIRED)
 
-add_compile_options(-g)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_compile_options(-g)
+else()
+	add_compile_options(-O3)
+endif()
 
 add_executable(parallax_square 
 	src/main.cpp

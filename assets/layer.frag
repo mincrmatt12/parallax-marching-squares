@@ -8,11 +8,10 @@ layout(binding = 2) uniform sampler3D ColorMap;
 
 out vec4 Color;
 
-const float ADVANCE_X = 4 / 2.5;
-const float ADVANCE_Y = 4;
-const float THRESH = 0.35;
+const float ADVANCE_X = 3.5 / 2.5;
+const float ADVANCE_Y = 3.5;
+const float THRESH = 0.25;
 const vec3  ADVANCE = vec3(ADVANCE_X, ADVANCE_Y, 1);
-const float PADDING = 2 / 20;
 const float LAYER_DISTANCE = 2.0;
 
 // indexes into: right bar, _, overline, / \ left bar

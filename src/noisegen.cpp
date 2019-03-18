@@ -15,10 +15,12 @@ GLuint noisegen::generateNoiseTexture(int width, int height, int layers, int see
 	noise->SetPerturbType(FastNoiseSIMD::PerturbType::GradientFractal);
 	noise->SetPerturbAmp(0.2);
 	noise->SetPerturbFractalOctaves(4);
+	noise->SetCellularReturnType(FastNoiseSIMD::CellularReturnType::Distance2Cave);
+	noise->SetCellularDistanceFunction(FastNoiseSIMD::CellularDistanceFunction::Natural);
 	
 	std::cout << "Generating noise, please wait... ";
 	std::cout.flush();
-	float * noise_data = noise->GetSimplexFractalSet(0, 0, 0, layers, height, width);
+	float * noise_data = noise->GetCellularSet(0, 0, 0, layers, height, width);
 	std::cout << "Done" << std::endl;
 
 	// Upload data to texture
