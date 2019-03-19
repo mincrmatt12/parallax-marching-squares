@@ -38,23 +38,21 @@ int character::Char::sample_box(float x, float y, float z) {
 		   (sample_at(x + CHAR_SIZE_X, y, z) << 3);
 }
 
-
-character::Char::Char(int sX, int sY, int sZ, float z, float * data) :
-	position(0, 0, z), voxel_size(sX, sY, sZ), voxel_data(data) {
-	// Compute a valid location by sampling up in 4s.
-	
-	
+template<typename Cap>
+glm::vec3 pick_position_for(float z, Cap&& sample_at) {
+	glm::vec3 position;
+	position.z = z;
 	{
 		std::random_device rd;
 		std::mt19937 gen(rd());
-		std::uniform_real_distribution<float> dis(0, sX);
+		std::uniform_real_distribution<float> dis(0, 512);
 
 		position.x = dis(gen);
 	}
 
 	bool valid = false;
 
-	for (int Y = 0; Y < sY; ++Y) {
+	for (int Y = 0; Y < 512; ++Y) {
 		if (!valid && sample_at(position.x, Y, position.z)) valid = true;
 		else if (valid && sample_at(position.x, Y, position.z) && !sample_at(position.x, Y + 3, position.z)) {
 			position.y = Y+0.6;
@@ -62,6 +60,15 @@ character::Char::Char(int sX, int sY, int sZ, float z, float * data) :
 		}
 		else continue;
 	}
+
+	return position;
+}
+
+
+character::Char::Char(int sX, int sY, int sZ, float z, float * data) :
+	position(0, 0, z), voxel_size(sX, sY, sZ), voxel_data(data) {
+	// Compute a valid location by sampling up in 4s.
+	position = pick_position_for(z, [&](auto x, auto y, auto z){return sample_at(x, y, z);});
 
 	shader.attach(GL_VERTEX_SHADER, "assets/player.vert");
 	shader.attach(GL_FRAGMENT_SHADER, "assets/player.frag");
@@ -126,7 +133,7 @@ void character::Char::draw(const glm::mat4& matrix) {
 void character::Char::jump() {
 	if (!inAir)
 	{
-		velocity.y = 0.3; 
+		velocity.y = 1; 
 		inAir = true;
 	}
 }
@@ -184,6 +191,11 @@ void character::Char::update_physics() {
 		inAir = true;
 	}
 	else inAir = false;
+
+	if (position.y < -8) {
+		// Compute a valid location by sampling up in 4s.
+		position = pick_position_for(position.z, [&](auto x, auto y, auto z){return sample_at(x, y, z);});
+	}
 }
 
 glm::vec3 character::Char::get_center() {

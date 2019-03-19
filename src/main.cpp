@@ -11,7 +11,7 @@
 #include "character.h"
 
 const inline float ZOOM = 13;
-const inline float SPEED = 0.14;
+const inline float SPEED = 0.24;
 const inline int LAYERS = 8;
 const inline int SEED = 19;
 const inline int SIZE = 768;
