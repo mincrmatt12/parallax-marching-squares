@@ -13,7 +13,15 @@ namespace noisegen {
 		GLuint id;
 	};
 
-	GLuint generateNoiseTexture(int width, int height, int layers, int seed); 
+	struct NoiseSet {
+		NoiseSet(int size);
+		~NoiseSet();
+
+		float * data;
+	};
+
+	// Optional buffer gets filled in OPENGL format, i.e. z increases slowest
+	GLuint generateNoiseTexture(int width, int height, int layers, int seed, float * buffer = nullptr); 
 }
 
 #endif /* ifndef NOISEGEN_H */
