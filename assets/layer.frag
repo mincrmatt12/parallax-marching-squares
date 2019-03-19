@@ -10,7 +10,7 @@ out vec4 Color;
 
 const float ADVANCE_X = 3.5 / 2.5;
 const float ADVANCE_Y = 3.5;
-const float THRESH = 0.25;
+const float THRESH = 0.2;
 const vec3  ADVANCE = vec3(ADVANCE_X, ADVANCE_Y, 1);
 const float LAYER_DISTANCE = 2.0;
 
@@ -67,7 +67,7 @@ void main() {
 
 	// If empty, discard
 	if (index == 15) {
-		Color = vec4(0, 0, 0, 1);
+		Color = vec4(0.05, 0.05, 0.05, 1);
 		return;
 	}
 	if (LOOKUP_TABLE[index] == -1) discard;
