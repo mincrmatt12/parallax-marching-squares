@@ -10,11 +10,11 @@
 #include "renderman.h"
 #include "character.h"
 
-const inline float ZOOM = 13;
-const inline float SPEED = 0.24;
-const inline int LAYERS = 8;
-const inline int SEED = 19;
-const inline int SIZE = 768;
+const float ZOOM = 13;
+const float SPEED = 0.24;
+extern const int LAYERS = 16;
+const int SEED = 555;
+extern const int SIZE = 768;
 constexpr inline float SENS = 0.008;
 
 int main(int argc, char ** argv) {
@@ -68,7 +68,7 @@ int main(int argc, char ** argv) {
 	glEnable(GL_DEPTH_TEST);
 
 	// Create character
-	character::Char character(SIZE, SIZE, LAYERS, 2.5, noiseMap.data);
+	character::Char character(SIZE, SIZE, LAYERS, noiseMap.data);
 
 	while (true) {
 		// Handle events
@@ -85,6 +85,7 @@ int main(int argc, char ** argv) {
 					case sf::Event::KeyPressed:
 						if (event.key.code == sf::Keyboard::Escape) goto die;
 						if (event.key.code == sf::Keyboard::Space) character.jump();
+						if (event.key.code == sf::Keyboard::Equal) character.respawn();
 						break;
 					default:
 						break;
@@ -103,7 +104,9 @@ int main(int argc, char ** argv) {
 		}
 
 		// Do rendering
-		view = glm::lookAt(character.get_center() + glm::vec3(0, 0.5, ZOOM), character.get_center(), glm::vec3(0, 1, 0));
+		auto cp = character.get_center();
+		cp = glm::vec3(cp.x, cp.y, -cp.z * 2);
+		view = glm::lookAt(cp - glm::vec3(0, -0.5, -ZOOM), cp, glm::vec3(0, 1, 0));
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

@@ -8,13 +8,14 @@
 
 namespace character {
 	struct Char {
-		Char(int sizeX, int sizeY, int sZ, float z, float * voxel);
+		Char(int sizeX, int sizeY, int sZ, float * voxel);
 		~Char();
 
 		void draw(const glm::mat4& matrix); // binds our vao and draws both passes
 		void jump();
 		void update_physics();
 		void set_x_impulse(float x_impulse);
+		void respawn();
 
 		glm::vec3 get_center();
 	private:

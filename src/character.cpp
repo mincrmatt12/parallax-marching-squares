@@ -10,6 +10,8 @@ constexpr inline float CHAR_SIZE_Y = 3.5;
 constexpr inline float COLLISION_X = 3.5 / 2.5;
 constexpr inline float COLLISION_Y = 3.5;
 constexpr inline float GRAVITY = 0.006;
+extern const int SIZE;
+extern const int LAYERS;
 
 bool character::Char::sample_at(float x, float y, float z) {
 	z = glm::floor(z); // use nearest z
@@ -39,15 +41,16 @@ int character::Char::sample_box(float x, float y, float z) {
 }
 
 template<typename Cap>
-glm::vec3 pick_position_for(float z, Cap&& sample_at) {
+glm::vec3 pick_position_for(Cap&& sample_at) {
 	glm::vec3 position;
-	position.z = z;
 	{
 		std::random_device rd;
 		std::mt19937 gen(rd());
-		std::uniform_real_distribution<float> dis(0, 512);
+		std::uniform_real_distribution<float> dis(0, SIZE);
+		std::uniform_real_distribution<float> dis2(0, LAYERS);
 
 		position.x = dis(gen);
+		position.z = glm::floor(dis2(gen));
 	}
 
 	bool valid = false;
@@ -65,16 +68,17 @@ glm::vec3 pick_position_for(float z, Cap&& sample_at) {
 }
 
 
-character::Char::Char(int sX, int sY, int sZ, float z, float * data) :
-	position(0, 0, z), voxel_size(sX, sY, sZ), voxel_data(data) {
+character::Char::Char(int sX, int sY, int sZ, float * data) :
+	position(0, 0, 0), voxel_size(sX, sY, sZ), voxel_data(data) {
 	// Compute a valid location by sampling up in 4s.
-	position = pick_position_for(z, [&](auto x, auto y, auto z){return sample_at(x, y, z);});
+	position = pick_position_for([&](auto x, auto y, auto z){return sample_at(x, y, z);});
 
 	shader.attach(GL_VERTEX_SHADER, "assets/player.vert");
 	shader.attach(GL_FRAGMENT_SHADER, "assets/player.frag");
 	shader.compile();
 
 	// Create a VAO
+	float z = 0;
 	
 	float vertex_data[] = {
 		0, 0, z,  0, 0,
@@ -194,12 +198,16 @@ void character::Char::update_physics() {
 
 	if (position.y < -8) {
 		// Compute a valid location by sampling up in 4s.
-		position = pick_position_for(position.z, [&](auto x, auto y, auto z){return sample_at(x, y, z);});
+		respawn();
 	}
 }
 
 glm::vec3 character::Char::get_center() {
 	return position + glm::vec3(CHAR_SIZE_X / 2, CHAR_SIZE_Y / 2, 0);
+}
+
+void character::Char::respawn() {
+	position = pick_position_for([&](auto x, auto y, auto z){return sample_at(x, y, z);});
 }
 
 character::Char::~Char() {
