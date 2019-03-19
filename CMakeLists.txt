@@ -17,6 +17,8 @@ add_executable(parallax_square
 	src/main.cpp
 	src/noisegen.cpp
 	src/renderman.cpp
+	src/character.cpp
+	src/aabb.cpp
 )
 
 set_property(TARGET parallax_square PROPERTY CXX_STANDARD 17)
